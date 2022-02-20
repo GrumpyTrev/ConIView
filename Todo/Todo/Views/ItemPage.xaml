@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:ConIView;assembly=ConIView"
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
+             x:Class="ConIView.Views.ItemPage"
+             Title="{Binding Name}">
+    <AbsoluteLayout>
+        <CarouselView Loop="False"
+            x:Name="carouselView">
+            <CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="{Binding Name}" 
+                                   FontAttributes="Bold" 
+                                   FontSize="Subtitle" Margin="5,0,0,0" />
+                            <ImageButton Source="play.png" 
+                                         IsVisible="{Binding HasSounds}" 
+                                         HeightRequest="35"
+                                         BackgroundColor="Transparent"
+                                         Clicked="Sound_Clicked" HorizontalOptions="EndAndExpand" Margin="0,0,5,0">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="Scale"
+                                                        Value="1" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="Scale"
+                                                        Value="0.8" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </ImageButton>
+                        </StackLayout>
+                        <local:PinchToZoomContainer>
+                            <local:PinchToZoomContainer.Content>
+								<ff:CachedImage Source="{Binding Image}"
+									   Success="OnImageLoaded"
+                                       WidthRequest="{Binding Source= {RelativeSource AncestorType={x:Type AbsoluteLayout}}, Path=Width}"
+                                       HeightRequest="{Binding Source={RelativeSource Self}, Path=WidthRequest}"
+                                       Aspect="AspectFit" />
+                            </local:PinchToZoomContainer.Content>
+                        </local:PinchToZoomContainer>
+						<ScrollView VerticalOptions="FillAndExpand">
+                            <StackLayout Margin="5,0,0,0" Spacing="0">
+								<Label
+									IsVisible="{Binding Ident.ShowLength}">
+									<Label.Text>
+										<MultiBinding StringFormat="Length: {0}  Wingspan: {1}">
+											<Binding Path="Ident.Length" />
+											<Binding Path="Ident.Wingspan" />
+										</MultiBinding>
+									</Label.Text>
+								</Label>
+								<Label Text="{Binding Ident.Weight, StringFormat='Weight: {0}'}"
+									   IsVisible="{Binding Ident.ShowWeight}"/>
+								<Label Text="{Binding Ident.Status, StringFormat='Status: {0}'}" 
+									   IsVisible="{Binding Ident.ShowStatus}"/>
+								<Label Text="{Binding Ident.Conservation, StringFormat='Conservation status: {0}'}"
+									   IsVisible="{Binding Ident.ShowConservation}"/>
+								<Label Text="{Binding Ident.Breeding, StringFormat='Breeding birds: {0}'}"
+									   IsVisible="{Binding Ident.ShowBreeding}"/>
+								<Label Text="{Binding Ident.Wintering, StringFormat='Over-wintering birds: {0}'}"
+									   IsVisible="{Binding Ident.ShowWintering}"/>
+							</StackLayout>
+                        </ScrollView>
+						<Button Text="Ident" TextTransform="None" Clicked="OnIdentClicked" />
+					</StackLayout>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+    </AbsoluteLayout>
+</ContentPage>
