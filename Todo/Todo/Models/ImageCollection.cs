@@ -37,9 +37,27 @@ namespace ConIView.Models
 		public string Length { get; set; }
 
 		/// <summary>
+		/// Properties allowing the availability of the key values to be bound
+		/// </summary>
+		public bool ShowScience => Science.Length > 0;
+		public bool ShowFamily => Family.Length > 0;
+		public bool ShowLength => Length.Length > 0;
+
+		/// <summary>
 		/// Name of the main image used to represent the subject. This is the first image from the ImageDetails collection
 		/// </summary>
 		public string Image { get; set; }
+
+		/// <summary>
+		/// Collection of sound files held for the subject.
+		/// This is common to all subject images
+		/// </summary>
+		public List<string> Sounds { get; set; }
+
+		/// <summary>
+		/// Are there any sounds held for the subject
+		/// </summary>
+		public bool HasSounds => Sounds != null;
 
 		/// <summary>
 		/// The collection of all the images held for the subject 

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ConIView.Data;
 using ConIView.Models;
+using MediaManager;
 using Xamarin.Forms;
 
 namespace ConIView.Views
@@ -52,6 +54,19 @@ namespace ConIView.Views
 					BindingContext = e.Item as ImageSet
 				} );
 			}
+		}
+
+		private async void Sound_Clicked( object sender, EventArgs e )
+		{
+			ImageSet imageSet = ( ( ImageButton )sender ).BindingContext as ImageSet;
+			List<MediaManager.Library.IMediaItem> itemsToPlay = new List<MediaManager.Library.IMediaItem>();
+
+			foreach ( string soundFile in imageSet.Sounds )
+			{
+				itemsToPlay.Add( await CrossMediaManager.Current.Extractor.CreateMediaItem( soundFile ) );
+			}
+
+			_ = CrossMediaManager.Current.Play( itemsToPlay );
 		}
 
 		private async void OnSelectList( object sender, EventArgs e )

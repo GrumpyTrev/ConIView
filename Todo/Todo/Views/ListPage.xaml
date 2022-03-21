@@ -16,11 +16,39 @@
                 <ViewCell>
 					<StackLayout Orientation="Horizontal">
 						<StackLayout Orientation="Vertical" >
-                            <Label Text="{Binding Name}"
-                                   FontAttributes="Bold" FontSize="Subtitle" />
-                            <Label Text="{Binding Science}" />
-                            <Label Text="{Binding Family}" />
-							<Label Text="{Binding Length, StringFormat='Length: {0}'}" />
+							<StackLayout Orientation="Horizontal">
+								<Label Text="{Binding Name}" 
+                                   FontAttributes="Bold" 
+                                   FontSize="Subtitle" Margin="0,0,0,0" />
+								<ImageButton Source="play.png" 
+                                         IsVisible="{Binding HasSounds}" 
+                                         HeightRequest="30"
+                                         BackgroundColor="Transparent"
+                                         Clicked="Sound_Clicked" HorizontalOptions="EndAndExpand" Margin="0,0,0,0">
+									<VisualStateManager.VisualStateGroups>
+										<VisualStateGroup x:Name="CommonStates">
+											<VisualState x:Name="Normal">
+												<VisualState.Setters>
+													<Setter Property="Scale"
+                                                        Value="1" />
+												</VisualState.Setters>
+											</VisualState>
+											<VisualState x:Name="Pressed">
+												<VisualState.Setters>
+													<Setter Property="Scale"
+                                                        Value="0.8" />
+												</VisualState.Setters>
+											</VisualState>
+										</VisualStateGroup>
+									</VisualStateManager.VisualStateGroups>
+								</ImageButton>
+							</StackLayout>
+							<Label Text="{Binding Science}"
+								   IsVisible="{Binding ShowScience}" />
+                            <Label Text="{Binding Family}"
+								   IsVisible="{Binding ShowFamily}" />
+							<Label Text="{Binding Length, StringFormat='Length: {0}'}"
+								   IsVisible="{Binding ShowLength}" />
                         </StackLayout>
                         <ff:CachedImage Success="OnImageLoaded" 
 										DownsampleWidth="170" 

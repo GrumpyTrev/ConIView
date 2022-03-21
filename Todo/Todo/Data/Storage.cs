@@ -79,7 +79,8 @@ namespace ConIView.Data
 									Image = itemContents[ 0 ],
 									Science = ident.Science,
 									Family = ident.Family,
-									Length = ident.Length
+									Length = ident.Length,
+									Sounds = soundFiles
 								};
 
 								images.ImageSets.Add( mainItem );
