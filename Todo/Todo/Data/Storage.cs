@@ -11,6 +11,8 @@ namespace ConIView.Data
 	{
 		public static async void GetItems( Action itemsAvailable )
 		{
+			dataAvailableCallback = itemsAvailable;
+
 			// Is the data already available
 			if ( ImageCollections == null )
 			{
@@ -19,101 +21,105 @@ namespace ConIView.Data
 				{
 					readingData = true;
 
-					// Start reading the data off the main thread
-					await Task.Run( () =>
+					// Build up the data in a local collection
+					List<ImageCollection> localCollection = new List<ImageCollection>();
+
+					string storageLocation = GetStoragePath();
+					if ( storageLocation.Length > 0 )
 					{
-						// Build up the data in a local collection
-						List<ImageCollection> localCollection = new List<ImageCollection>();
-
-						// Get the paths of all the collections in the storage folder
-						string[] collectionFolders = Directory.GetDirectories( Constants.StoreFolder );
-
-						// Now read in each collection. 
-						foreach ( string folderName in collectionFolders )
+						// Start reading the data off the main thread
+						await Task.Run( () =>
 						{
-							// Create a new ImageCollection for this folder and add it to the main collection
-							ImageCollection images = new ImageCollection
+							// Get the paths of all the collections in the storage folder
+							string[] collectionFolders = Directory.GetDirectories( storageLocation );
+
+							// Now read in each collection. 
+							foreach ( string folderName in collectionFolders )
 							{
-								Title = Path.GetFileName( folderName )
-							};
-							localCollection.Add( images );
-
-							// Get all the image sets in the folder and sort them alphabetically
-							string[] setFolders = Directory.GetDirectories( folderName );
-							Array.Sort( setFolders );
-
-							// Now read in the ImageSets
-							foreach ( string itemName in setFolders )
-							{
-								string folderShortName = Path.GetFileName( itemName );
-								Dictionary<string, NotesDetail> notePages = new Dictionary<string, NotesDetail>();
-
-								// Get the pathnames of all the files in this directory and sort them
-								List<string> fileNames = Directory.GetFiles( itemName ).ToList();
-								fileNames.Sort();
-
-								// Get the names of all the imgage files
-								List<string> itemContents = fileNames.Where( item => ( Path.GetExtension( item ) == ".jpg" ) ||
-										( Path.GetExtension( item ) == ".png" ) ).ToList();
-
-								// Check if there are any sound files
-								List<string> soundFiles = fileNames.Where( item => Path.GetExtension( item ) == ".mp3" ).ToList();
-
-								// Check for any text files.
-								List<string> textFiles = fileNames.Where( item => Path.GetExtension( item ) == ".txt" ).ToList();
-
-								// If there is an 'ident' file then extract the identity fields from it
-								string identFile = textFiles.SingleOrDefault( item => Path.GetFileNameWithoutExtension( item ) == "ident" );
-								IdentNotes ident = IdentNotes.ExtractNotes( identFile );
-
-								// Add the ident notes to the note pages collection
-								if ( ident != null )
+								// Create a new ImageCollection for this folder and add it to the main collection
+								ImageCollection images = new ImageCollection
 								{
-									notePages[ "ident" ] = new NotesDetail() { Name = folderShortName + " - Ident", Notes = ident.OtherNotes };
-								}
-
-								// Create an ImageSet for this folder and add to the ImageCollection
-								ImageSet mainItem = new ImageSet
-								{
-									Name = folderShortName,
-									Image = itemContents[ 0 ],
-									Science = ident.Science,
-									Family = ident.Family,
-									Length = ident.Length,
-									Sounds = soundFiles
+									Title = Path.GetFileName( folderName )
 								};
+								localCollection.Add( images );
 
-								images.ImageSets.Add( mainItem );
+								// Get all the image sets in the folder and sort them alphabetically
+								string[] setFolders = Directory.GetDirectories( folderName );
+								Array.Sort( setFolders );
 
-								// Add a ItemDetail entry for each image file
-								foreach ( string imageName in itemContents )
+								// Now read in the ImageSets
+								foreach ( string itemName in setFolders )
 								{
-									mainItem.ImageDetails.Add( new ImageDetail()
+									string folderShortName = Path.GetFileName( itemName );
+									Dictionary<string, NotesDetail> notePages = new Dictionary<string, NotesDetail>();
+
+									// Get the pathnames of all the files in this directory and sort them
+									List<string> fileNames = Directory.GetFiles( itemName ).ToList();
+									fileNames.Sort();
+
+									// Get the names of all the imgage files
+									List<string> itemContents = fileNames.Where( item => ( Path.GetExtension( item ) == ".jpg" ) ||
+												( Path.GetExtension( item ) == ".png" ) ).ToList();
+
+									// Check if there are any sound files
+									List<string> soundFiles = fileNames.Where( item => Path.GetExtension( item ) == ".mp3" ).ToList();
+
+									// Check for any text files.
+									List<string> textFiles = fileNames.Where( item => Path.GetExtension( item ) == ".txt" ).ToList();
+
+									// If there is an 'ident' file then extract the identity fields from it
+									string identFile = textFiles.SingleOrDefault( item => Path.GetFileNameWithoutExtension( item ) == "ident" );
+									IdentNotes ident = IdentNotes.ExtractNotes( identFile );
+
+									// Add the ident notes to the note pages collection
+									if ( ident != null )
 									{
-										Name = GetImageName( imageName ),
-										Image = imageName,
-										NotePages = notePages,
-										Sounds = soundFiles,
-										Ident = ident
-									} );
+										notePages[ "ident" ] = new NotesDetail() { Name = folderShortName + " - Ident", Notes = ident.OtherNotes };
+									}
+
+									// Create an ImageSet for this folder and add to the ImageCollection
+									ImageSet mainItem = new ImageSet
+									{
+										Name = folderShortName,
+										Image = itemContents[ 0 ],
+										Science = ident.Science,
+										Family = ident.Family,
+										Length = ident.Length,
+										Sounds = soundFiles
+									};
+
+									images.ImageSets.Add( mainItem );
+
+									// Add a ItemDetail entry for each image file
+									foreach ( string imageName in itemContents )
+									{
+										mainItem.ImageDetails.Add( new ImageDetail()
+										{
+											Name = GetImageName( imageName ),
+											Image = imageName,
+											NotePages = notePages,
+											Sounds = soundFiles,
+											Ident = ident
+										} );
+									}
 								}
 							}
-						}
+						} );
+					}
 
-						// Copy to the public collection
-						ImageCollections = localCollection;
+					readingData = false;
 
-						readingData = false;
-					} );
+					// Copy to the public collection
+					ImageCollections = localCollection;
 
 					// Data now available, call the delegate
-					itemsAvailable?.Invoke();
+					dataAvailableCallback?.Invoke();
 				}
 			}
 			else
 			{
-				// Data already availbael so call the delegate 
-				itemsAvailable?.Invoke();
+				// Data already available so call the delegate 
+				dataAvailableCallback?.Invoke();
 			}
 		}
 
@@ -143,9 +149,40 @@ namespace ConIView.Data
 			return imageName.First().ToString().ToUpper() + imageName.Substring( 1 );
 		}
 
+		private static string GetStoragePath()
+		{
+			// Find the storage location. Look on any external storage first
+			string storageLocation = App.FileProvider.ExternalDirectory;
+			if ( storageLocation.Length > 0 )
+			{
+				storageLocation = Path.Combine( storageLocation, Constants.StorageFolder );
+				if ( Directory.Exists( storageLocation ) == false )
+				{
+					storageLocation = "";
+				}
+			}
+
+			// Not found on external storage, or there is no external storage
+			if ( storageLocation.Length == 0 )
+			{
+				storageLocation = Path.Combine( App.FileProvider.InternalDirectory, Constants.StorageFolder );
+				if ( Directory.Exists( storageLocation ) == false )
+				{
+					storageLocation = "";
+				}
+			}
+
+			return storageLocation;
+		}
+
 		/// <summary>
 		/// Keep track of whether or not the collection data is beomg read
 		/// </summary>
 		private static bool readingData = false;
+
+		/// <summary>
+		/// Callback when data is available
+		/// </summary>
+		private static Action dataAvailableCallback = null;
 	}
 }

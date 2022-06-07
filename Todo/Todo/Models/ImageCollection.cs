@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using Xamarin.Forms;
 
 namespace ConIView.Models
 {
 	/// <summary>
 	/// The ImageCollection class represents a collection of related subjects, each subject is represented by an ImageSet class
 	/// </summary>
-	public class ImageCollection
+	public class ImageCollection : INotifyPropertyChanged
 	{
 		/// <summary>
 		/// The title of this collection shown when displaying the contents of tbe collection and when choosing a collection to display
@@ -16,7 +20,41 @@ namespace ConIView.Models
 		/// <summary>
 		/// These are the ImageSet instances making up the collection
 		/// </summary>
-		public List<ImageSet> ImageSets { get; } = new List<ImageSet>();
+		public List<ImageSet> ImageSets { get; private set; } = new List<ImageSet>();
+
+		public bool SortedByName { get; set; } = true;
+
+		public string SortedByText { get; set; } = "By name";
+
+		public void ToggleSortOrder()
+		{
+			SortedByName = !SortedByName;
+			SortedByText = SortedByName == true ? "By name" : "By family";
+
+			if ( SortedByName == true )
+			{
+				ImageSets.Sort( ( a, b ) => a.Name.CompareTo( b.Name ) );
+			}
+			else
+			{
+				ImageSets.Sort( ( a, b ) => 
+				{
+					int result = a.Family.CompareTo( b.Family );
+					if ( result == 0 )
+					{
+						result = a.Name.CompareTo( b.Name );
+					}
+
+					return result;
+				} );
+			}
+
+			ImageSets = new List<ImageSet>( ImageSets );
+			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( "SortedByText" ) );
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
 	}
 
 	/// <summary>
@@ -57,7 +95,7 @@ namespace ConIView.Models
 		/// <summary>
 		/// Are there any sounds held for the subject
 		/// </summary>
-		public bool HasSounds => Sounds != null;
+		public bool HasSounds => Sounds.Count > 0;
 
 		/// <summary>
 		/// The collection of all the images held for the subject 
@@ -100,7 +138,7 @@ namespace ConIView.Models
 		/// <summary>
 		/// Are there any sounds held for the subject
 		/// </summary>
-		public bool HasSounds => Sounds != null;
+		public bool HasSounds => Sounds.Count > 0;
 	}
 
 	/// <summary>
@@ -133,6 +171,9 @@ namespace ConIView.Models
 		public string Length { get; set; } = "";
 		public string Wingspan { get; set; } = "";
 		public string Weight { get; set; } = "";
+		public string Size { get; set; } = "";
+		public string Lifecycle { get; set; } = "";
+		public string Foodplant { get; set; } = "";
 
 		/// <summary>
 		/// Properties allowing the availability of the key values to be bound
@@ -146,6 +187,11 @@ namespace ConIView.Models
 		public bool ShowLength => Length.Length > 0;
 		public bool ShowWingspan => Wingspan.Length > 0;
 		public bool ShowWeight => Weight.Length > 0;
+		public bool ShowSize => Size.Length > 0;
+		public bool ShowLifecycle => Lifecycle.Length > 0;
+		public bool ShowFoodplant => Foodplant.Length > 0;
+
+		public bool ShowGraphicLifecycle => false;
 
 		/// <summary>
 		/// The rest of the ident file
@@ -170,45 +216,62 @@ namespace ConIView.Models
 				foreach ( string line in lines )
 				{
 					// Look for keyword lines
-					if ( line.StartsWith( "science:" ) == true )
+					if ( line.IndexOf(':') == -1 )
 					{
-						ident.Science = line.Substring( "science:".Length ).TrimStart();
+						// Does not contain any keyword so add to non keywored collection
+						nonKeywordLines.Add( line );
+					}
+					else if ( line.StartsWith( "science:" ) == true )
+					{
+						ident.Science = line.Substring( 8 );
 					}
 					else if ( line.StartsWith( "family:" ) == true )
 					{
-						ident.Family = line.Substring( "family:".Length ).TrimStart();
+						ident.Family = line.Substring( 7 );
 					}
 					else if ( line.StartsWith( "status:" ) == true )
 					{
-						ident.Status = line.Substring( "status:".Length ).TrimStart();
+						ident.Status = line.Substring( 7 );
 					}
 					else if ( line.StartsWith( "conservation:" ) == true )
 					{
-						ident.Conservation = line.Substring( "conservation:".Length ).TrimStart();
+						ident.Conservation = line.Substring( 13 );
 					}
 					else if ( line.StartsWith( "breeding:" ) == true )
 					{
-						ident.Breeding = line.Substring( "breeding:".Length ).TrimStart();
+						ident.Breeding = line.Substring( 9 );
 					}
 					else if ( line.StartsWith( "wintering:" ) == true )
 					{
-						ident.Wintering = line.Substring( "wintering:".Length ).TrimStart();
+						ident.Wintering = line.Substring( 10 );
 					}
 					else if ( line.StartsWith( "length:" ) == true )
 					{
-						ident.Length = line.Substring( "length:".Length ).TrimStart();
+						ident.Length = line.Substring( 6 );
 					}
 					else if ( line.StartsWith( "wingspan:" ) == true )
 					{
-						ident.Wingspan = line.Substring( "wingspan:".Length ).TrimStart();
+						ident.Wingspan = line.Substring( 9 );
 					}
 					else if ( line.StartsWith( "weight:" ) == true )
 					{
-						ident.Weight = line.Substring( "weight:".Length ).TrimStart();
+						ident.Weight = line.Substring( 7 );
+					}
+					else if ( line.StartsWith( "size:" ) == true )
+					{
+						ident.Size = line.Substring( 5 );
+					}
+					else if ( line.StartsWith( "lifecycle:" ) == true )
+					{
+						ident.Lifecycle = line.Substring( 10 );
+					}
+					else if ( line.StartsWith( "foodplant:" ) == true )
+					{
+						ident.Foodplant = line.Substring( 10 );
 					}
 					else
 					{
-						// Not a keyword
+						// Not a known keyword
 						nonKeywordLines.Add( line );
 					}
 				}

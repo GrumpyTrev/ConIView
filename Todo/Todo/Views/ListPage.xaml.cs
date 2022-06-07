@@ -34,6 +34,8 @@ namespace ConIView.Views
 
 			ImageCollection selectedItems = Storage.ImageCollections[ selectedList ];
 
+			BindingContext = selectedItems;
+
 			listView.ItemsSource = selectedItems.ImageSets;
 
 			// Make sure that the listview is scrolled to the top
@@ -42,7 +44,7 @@ namespace ConIView.Views
 				listView.ScrollTo( selectedItems.ImageSets[ 0 ], ScrollToPosition.Start, false );
 			}
 
-			Title = Storage.ImageCollections[ selectedList ].Title;
+			Title = selectedItems.Title;
 		}
 
 		private async void OnListItemSelected( object sender, ItemTappedEventArgs e )
@@ -81,6 +83,12 @@ namespace ConIView.Views
 
 				ItemsAvailable();
 			}
+		}
+
+		private void OnSort( object sender, EventArgs e )
+		{
+			( ( ImageCollection )BindingContext ).ToggleSortOrder();
+			ItemsAvailable();
 		}
 
 		private static int selectedList = -1;

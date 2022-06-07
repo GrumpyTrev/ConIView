@@ -49,15 +49,14 @@
                         </local:PinchToZoomContainer>
 						<ScrollView VerticalOptions="FillAndExpand">
                             <StackLayout Margin="5,0,0,0" Spacing="0">
-								<Label
-									IsVisible="{Binding Ident.ShowLength}">
-									<Label.Text>
-										<MultiBinding StringFormat="Length: {0}  Wingspan: {1}">
-											<Binding Path="Ident.Length" />
-											<Binding Path="Ident.Wingspan" />
-										</MultiBinding>
-									</Label.Text>
-								</Label>
+								<StackLayout Orientation="Horizontal">
+									<Label Text="{Binding Ident.Length, StringFormat='Length: {0}'}"
+										   IsVisible="{Binding Ident.ShowLength}"/>
+									<Label Text="{Binding Ident.Size, StringFormat='Size: {0}'}"
+										   IsVisible="{Binding Ident.ShowSize}"/>
+									<Label Text="{Binding Ident.Wingspan, StringFormat='Wingspan: {0}'}"
+									       IsVisible="{Binding Ident.ShowWingspan}"/>
+								</StackLayout>
 								<Label Text="{Binding Ident.Weight, StringFormat='Weight: {0}'}"
 									   IsVisible="{Binding Ident.ShowWeight}"/>
 								<Label Text="{Binding Ident.Status, StringFormat='Status: {0}'}" 
@@ -68,6 +67,50 @@
 									   IsVisible="{Binding Ident.ShowBreeding}"/>
 								<Label Text="{Binding Ident.Wintering, StringFormat='Over-wintering birds: {0}'}"
 									   IsVisible="{Binding Ident.ShowWintering}"/>
+								<Label Text="{Binding Ident.Lifecycle, StringFormat='Lifecycle: {0}'}"
+									   IsVisible="{Binding Ident.ShowLifecycle}"/>
+								<Grid  ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*"
+									   RowDefinitions="24"
+									   IsVisible="{Binding Ident.ShowGraphicLifecycle}">
+									<Label Grid.Column ="0" 
+										   Grid.Row="0"
+										   Text="J" />
+									<Label Grid.Column ="1" 
+										   Grid.Row="0"
+										   Text="F" />
+									<Label Grid.Column ="2" 
+										   Grid.Row="0"
+										   Text="M" />
+									<Label Grid.Column ="3" 
+										   Grid.Row="0"
+										   Text="A" />
+									<Label Grid.Column ="4" 
+										   Grid.Row="0"
+										   Text="M" />
+									<Label Grid.Column ="5" 
+										   Grid.Row="0"
+										   Text="J" />
+									<Label Grid.Column ="6" 
+										   Grid.Row="0"
+										   Text="J" />
+									<Label Grid.Column ="7" 
+										   Grid.Row="0"
+										   Text="A" />
+									<Label Grid.Column ="8" 
+										   Grid.Row="0"
+										   Text="S" />
+									<Label Grid.Column ="9" 
+										   Grid.Row="0"
+										   Text="O" />
+									<Label Grid.Column ="10" 
+										   Grid.Row="0"
+										   Text="N" />
+									<Label Grid.Column ="11" 
+										   Grid.Row="0"
+										   Text="D" />
+								</Grid>
+								<Label Text="{Binding Ident.Foodplant, StringFormat='Foodplant: {0}'}"
+									   IsVisible="{Binding Ident.ShowFoodplant}"/>
 							</StackLayout>
                         </ScrollView>
 						<Button Text="Ident" TextTransform="None" Clicked="OnIdentClicked" />

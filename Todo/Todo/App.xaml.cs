@@ -27,6 +27,6 @@ namespace ConIView
 			};
 		}
 
-		public static IDatabaseFileProvider FileProvider { get; set; } = null;
+		public static IPictureFileProvider FileProvider { get; set; } = null;
 	}
 }
