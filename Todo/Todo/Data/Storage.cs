@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ConIView.Models;
 using System.Linq;
 using System;
+using Xamarin.Essentials;
 
 namespace ConIView.Data
 {
@@ -20,6 +21,13 @@ namespace ConIView.Data
 				if ( readingData == false )
 				{
 					readingData = true;
+
+					PermissionStatus status = await Permissions.CheckStatusAsync<Permissions.StorageRead>();
+
+					if ( status != PermissionStatus.Granted )
+					{
+						status = await Permissions.RequestAsync<Permissions.StorageRead>();
+					}
 
 					// Build up the data in a local collection
 					List<ImageCollection> localCollection = new List<ImageCollection>();
